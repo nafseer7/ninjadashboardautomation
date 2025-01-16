@@ -18,7 +18,7 @@ DATABASE_NAME = "ninjadb"
 COLLECTION_NAME = "wordpressUrls"
 
 # Selenium Configuration
-CHROMEDRIVER_PATH = "/Users/nafseerck/OTT/domain-hider-selenium/chromedriver"
+CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
 service = Service(CHROMEDRIVER_PATH)
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")

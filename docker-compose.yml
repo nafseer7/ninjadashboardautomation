@@ -1,0 +1,27 @@
+version: '3.8'
+
+services:
+  fastapi:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi_app
+    environment:
+      - CHROMEDRIVER_PATH=/usr/local/bin/chromedriver
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/app
+    depends_on:
+      - chrome
+    restart: always
+
+  chrome:
+    image: selenium/standalone-chrome:latest
+    container_name: chrome
+    ports:
+      - "4444:4444"
+    environment:
+      - SE_OPTS=-host 0.0.0.0
+    restart: always
+

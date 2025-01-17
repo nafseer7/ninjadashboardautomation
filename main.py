@@ -67,39 +67,43 @@ async def process_wordpress_urls(data: dict = Body(...)):
         if not url.startswith("http"):
             url = f"https://{url}"
 
-        driver = webdriver.Chrome(service=service, options=options)
-
         try:
-            login_url = f"{url.rstrip('/')}/wp-login.php"
-            driver.get(login_url)
+            with webdriver.Chrome(service=service, options=options) as driver:
+                login_url = f"{url.rstrip('/')}/wp-login.php"
 
-            try:
-                username_input = WebDriverWait(driver, 10).until(
-                    EC.presence_of_element_located((By.ID, "user_login"))
-                )
-                password_input = driver.find_element(By.ID, "user_pass")
-                submit_button = driver.find_element(By.ID, "wp-submit")
-                username_input.send_keys(username)
-                password_input.send_keys(password)
-                submit_button.click()
-            except TimeoutException:
-                logging.info(f"Login form elements not found for {url}")
-                continue
+                # Set a timeout for the page load
+                driver.set_page_load_timeout(10)
+                try:
+                    driver.get(login_url)
+                except TimeoutException:
+                    logging.info(f"Page load timeout for {url}, skipping this site.")
+                    continue
 
-            WebDriverWait(driver, 10).until(lambda d: d.current_url != login_url)
-            if "wp-admin" in driver.current_url:
-                logging.info(f"Login successful: {url}")
-                successful_results.append({
-                    "url": url,
-                    "username": username,
-                    "password": password
-                })
-            else:
-                logging.info(f"Login failed for {url}")
+                try:
+                    username_input = WebDriverWait(driver, 10).until(
+                        EC.presence_of_element_located((By.ID, "user_login"))
+                    )
+                    password_input = driver.find_element(By.ID, "user_pass")
+                    submit_button = driver.find_element(By.ID, "wp-submit")
+                    username_input.send_keys(username)
+                    password_input.send_keys(password)
+                    submit_button.click()
+                except TimeoutException:
+                    logging.info(f"Login form elements not found for {url}")
+                    continue
+
+                WebDriverWait(driver, 10).until(lambda d: d.current_url != login_url)
+                if "wp-admin" in driver.current_url:
+                    logging.info(f"Login successful: {url}")
+                    successful_results.append({
+                        "url": url,
+                        "username": username,
+                        "password": password
+                    })
+                else:
+                    logging.info(f"Login failed for {url}")
         except Exception as e:
             logging.error(f"Error processing {url}: {e}")
-        finally:
-            driver.quit()
 
     if successful_results:
         # Save successful results to MongoDB

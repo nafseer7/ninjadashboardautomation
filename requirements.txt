@@ -3,3 +3,4 @@ uvicorn
 selenium
 pydantic
 motor
+httpx

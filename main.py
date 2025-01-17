@@ -11,11 +11,17 @@ from selenium.common.exceptions import TimeoutException, NoSuchElementException
 from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import logging
+import httpx
 
 # MongoDB Configuration
 MONGO_URI = "mongodb+srv://nafseerck:7gbNMNAc5s236F5K@overthetop.isxuv3s.mongodb.net"
 DATABASE_NAME = "ninjadb"
 COLLECTION_NAME = "wordpressUrls"
+
+
+# Telegram Bot Configuration
+TELEGRAM_BOT_TOKEN = "7850246709:AAF86-OK1MJj5_1eUCJhl5MZ9i2jCatZVNg"
+TELEGRAM_CHAT_ID = "1780375318"
 
 # Selenium Configuration
 CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
@@ -50,12 +56,39 @@ class WordPressUrl(BaseModel):
     url: str
     username: str
     password: str
+    
+    
+async def send_telegram_message(message: str):
+    """
+    Send a message to a Telegram bot.
+    """
+    url = f"https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage"
+    payload = {
+        "chat_id": TELEGRAM_CHAT_ID,
+        "text": message,
+        "parse_mode": "HTML"
+    }
+    async with httpx.AsyncClient() as client:
+        try:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+            logging.info(f"Message sent to Telegram: {message}")
+        except httpx.HTTPError as e:
+            logging.error(f"Failed to send message to Telegram: {str(e)}")    
 
 @app.post("/wordpress-process/")
 async def process_wordpress_urls(data: dict = Body(...)):
+    """
+    Process WordPress URLs from a JSON body with Telegram notifications.
+    """
     wordpress_urls = data.get("wordpressUrls")
     if not wordpress_urls:
         raise HTTPException(status_code=400, detail="Invalid or missing 'wordpressUrls' in payload")
+
+    logging.info(f"Processing {len(wordpress_urls)} WordPress URLs from the request body.")
+    
+    # Notify Telegram that the process has started
+    await send_telegram_message(f"🚀 <b>WordPress Process Started</b>\nTotal WordPress URLs to process: <b>{len(wordpress_urls)}</b>")
 
     successful_results = []
 
@@ -115,8 +148,20 @@ async def process_wordpress_urls(data: dict = Body(...)):
         }
         await collection.insert_one(document)
         logging.info(f"Results saved with filename: {filename}")
+
+        # Notify Telegram about successful results
+        success_count = len(successful_results)
+        await send_telegram_message(
+            f"✅ <b>WordPress Process Completed</b>\n"
+            f"File Name: <b>{filename}</b>\n"
+            f"Total WordPress URLs Processed: <b>{len(wordpress_urls)}</b>\n"
+            f"Successful Logins: <b>{success_count}</b>"
+        )
     else:
         logging.info("No successful logins to save.")
+        await send_telegram_message(
+            f"❌ <b>WordPress Process Completed</b>\nNo successful logins were recorded."
+        )
 
     return {
         "message": "Processing completed",

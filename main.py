@@ -24,7 +24,8 @@ TELEGRAM_BOT_TOKEN = "7850246709:AAF86-OK1MJj5_1eUCJhl5MZ9i2jCatZVNg"
 TELEGRAM_CHAT_ID = "1780375318"
 
 # Selenium Configuration
-CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
+# CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
+CHROMEDRIVER_PATH = "/Users/nafseerck/OTT/domain-hider-selenium/chromedriver"
 service = Service(CHROMEDRIVER_PATH)
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")
@@ -96,6 +97,7 @@ async def process_wordpress_urls(data: dict = Body(...)):
         url = wp_url["url"]
         username = wp_url["username"]
         password = wp_url["password"]
+        
 
         if not url.startswith("http"):
             url = f"https://{url}"
@@ -103,6 +105,7 @@ async def process_wordpress_urls(data: dict = Body(...)):
         try:
             with webdriver.Chrome(service=service, options=options) as driver:
                 login_url = f"{url.rstrip('/')}/wp-login.php"
+                print(login_url)
 
                 # Set a timeout for the page load
                 driver.set_page_load_timeout(10)
@@ -113,14 +116,21 @@ async def process_wordpress_urls(data: dict = Body(...)):
                     continue
 
                 try:
-                    username_input = WebDriverWait(driver, 10).until(
+                    username_input = WebDriverWait(driver, 20).until(
                         EC.presence_of_element_located((By.ID, "user_login"))
                     )
                     password_input = driver.find_element(By.ID, "user_pass")
                     submit_button = driver.find_element(By.ID, "wp-submit")
+                    
+                    username_input.clear()
                     username_input.send_keys(username)
+                    
+                    password_input.clear()
                     password_input.send_keys(password)
+                    
                     submit_button.click()
+                    
+                    
                 except TimeoutException:
                     logging.info(f"Login form elements not found for {url}")
                     continue

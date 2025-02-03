@@ -24,8 +24,8 @@ TELEGRAM_BOT_TOKEN = "7850246709:AAF86-OK1MJj5_1eUCJhl5MZ9i2jCatZVNg"
 TELEGRAM_CHAT_ID = "1780375318"
 
 # Selenium Configuration
-# CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
-CHROMEDRIVER_PATH = "/Users/nafseerck/OTT/domain-hider-selenium/chromedriver"
+CHROMEDRIVER_PATH = "/usr/local/bin/chromedriver"
+# CHROMEDRIVER_PATH = "/Users/nafseerck/OTT/domain-hider-selenium/chromedriver"
 service = Service(CHROMEDRIVER_PATH)
 options = webdriver.ChromeOptions()
 options.add_argument("--headless")

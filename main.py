@@ -89,7 +89,7 @@ async def process_wordpress_urls(data: dict = Body(...)):
     logging.info(f"Processing {len(wordpress_urls)} WordPress URLs from the request body.")
     
     # Notify Telegram that the process has started
-    await send_telegram_message(f"🚀 <b>WordPress Process Started</b>\nTotal WordPress URLs to process: <b>{len(wordpress_urls)}</b>")
+    await send_telegram_message(f"🚀 <b>WordPress Process Started Successfully</b>\nTotal WordPress URLs to process: <b>{len(wordpress_urls)}</b>")
 
     successful_results = []
 

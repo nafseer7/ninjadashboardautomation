@@ -136,13 +136,16 @@ async def process_wordpress_urls(data: dict = Body(...)):
                     continue
 
                 WebDriverWait(driver, 10).until(lambda d: d.current_url != login_url)
-                if "wp-admin" in driver.current_url:
+                current_url = driver.current_url
+
+                if "wp-admin" in current_url and "wp-admin/profile.php" not in current_url:
                     logging.info(f"Login successful: {url}")
                     successful_results.append({
                         "url": url,
                         "username": username,
                         "password": password
                     })
+
                 else:
                     logging.info(f"Login failed for {url}")
         except Exception as e:

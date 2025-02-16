@@ -12,6 +12,11 @@ from fastapi.middleware.cors import CORSMiddleware
 from datetime import datetime
 import logging
 import httpx
+import tempfile
+
+
+temp_user_data_dir = tempfile.mkdtemp()
+
 
 # MongoDB Configuration
 MONGO_URI = "mongodb+srv://nafseerck:7gbNMNAc5s236F5K@overthetop.isxuv3s.mongodb.net"
@@ -32,6 +37,7 @@ options.add_argument("--headless")
 options.add_argument("--disable-gpu")
 options.add_argument("--no-sandbox")
 options.page_load_strategy = "eager"
+options.add_argument(f"--user-data-dir={temp_user_data_dir}")  # Unique user data directory
 
 # FastAPI Setup
 app = FastAPI()
